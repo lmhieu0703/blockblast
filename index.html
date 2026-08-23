@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Block Blast - Siêu Cấp Đổi Thưởng</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font chữ hiện đại -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app-container">
+        
+        <!-- ============================================== -->
+        <!-- MÀN HÌNH ĐĂNG NHẬP LẦN ĐẦU (Chỉ hiện 1 lần) -->
+        <!-- ============================================== -->
+        <div id="login-screen" class="screen hidden overlay-screen">
+            <div class="modal-box box-glow">
+                <h2 class="title-gradient">CHÀO MỪNG TÂN THỦ!</h2>
+                <p>Nhập tên của bạn để tạo tài khoản</p>
+                <p class="highlight-text">🎁 Tặng ngay 20$ khởi nghiệp!</p>
+                <input type="text" id="new-player-name" placeholder="Nhập tên nhân vật..." maxlength="15">
+                <button id="btn-register" class="btn btn-primary">NHẬN QUÀ & VÀO GAME</button>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MÀN HÌNH MENU CHÍNH -->
+        <!-- ============================================== -->
+        <div id="menu-screen" class="screen active">
+            <!-- Thanh thông tin người chơi -->
+            <div class="user-bar">
+                <div class="user-info">
+                    <span class="avatar">👤</span>
+                    <span id="player-name-display">Đang tải...</span>
+                </div>
+                <div class="user-money">
+                    <span class="coin-icon">💰</span>
+                    <span id="player-money-display">0</span>$
+                </div>
+            </div>
+
+            <div class="game-logo">
+                <h1>BLOCK</h1>
+                <h1 class="text-blast">BLAST</h1>
+            </div>
+
+            <div class="menu-buttons">
+                <button id="btn-play" class="btn btn-play">▶ BẮT ĐẦU CHƠI</button>
+                <!-- NÚT THÊM ẢNH NỀN MỚI -->
+    <div style="margin-bottom: 20px;">
+        <input type="file" id="bg-upload" accept="image/*" style="display: none;">
+        <button id="btn-bg-upload" class="btn btn-menu" style="border-color: #00f5d4; color: #00f5d4;" onclick="document.getElementById('bg-upload').click()">
+            🖼️ ĐỔI ẢNH NỀN GAME
+        </button>
+    </div>
+    <!-- KẾT THÚC NÚT THÊM ẢNH -->
+                <button id="btn-leaderboard" class="btn btn-menu">🏆 BẢNG XẾP HẠNG</button>
+                
+                <div class="btn-group-half">
+                    <button id="btn-inbox" class="btn btn-menu half">
+                        📩 HỘP THƯ 
+                        <span id="inbox-badge" class="badge hidden">0</span>
+                    </button>
+                    <button id="btn-giftcode" class="btn btn-menu half">🎁 NHẬP CODE</button>
+                </div>
+                
+                <button id="btn-transfer" class="btn btn-menu">💸 CHUYỂN TIỀN CHO NGƯỜI KHÁC</button>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MÀN HÌNH CHƠI GAME CHÍNH -->
+        <!-- ============================================== -->
+        <div id="game-screen" class="screen hidden">
+            <!-- Header Game -->
+            <div class="game-header">
+                <div class="stat-box">
+                    <span class="stat-label">ĐIỂM</span>
+                    <span id="current-score" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">KỶ LỤC</span>
+                    <span id="high-score" class="stat-value text-gold">0</span>
+                </div>
+                <button id="btn-quit" class="btn-icon">❌</button>
+            </div>
+
+            <!-- Khung Lưới Chứa Block (8x8) -->
+            <div class="grid-wrapper">
+                <div id="game-board"></div>
+            </div>
+
+            <!-- Khu vực hiện 3 khối ngẫu nhiên -->
+            <div id="block-choices" class="choices-container">
+                <!-- JavaScript sẽ sinh ra các khối vào đây -->
+            </div>
+
+            <!-- MODAL HỒI SINH (Hiện ra khi hết đường đi) -->
+            <div id="revive-modal" class="modal-overlay hidden">
+                <div class="modal-box">
+                    <h2 style="color: #ff4757;">HẾT ĐƯỜNG ĐI!</h2>
+                    <p>Bạn có muốn hồi sinh để giữ nguyên điểm không?</p>
+                    <div class="revive-cost">Phí hồi sinh: <span id="revive-price">1</span>$</div>
+                    <p class="note">(Lần sau phí sẽ tăng gấp đôi)</p>
+                    <div class="modal-buttons">
+                        <button id="btn-do-revive" class="btn btn-primary">HỒI SINH NGAY</button>
+                        <button id="btn-die" class="btn btn-secondary">CHẤP NHẬN THUA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MÀN HÌNH BẢNG XẾP HẠNG -->
+        <!-- ============================================== -->
+        <div id="leaderboard-screen" class="screen hidden sub-screen">
+            <div class="sub-header">
+                <button class="btn-back" onclick="backToMenu()">🔙 Quản lại</button>
+                <h2>TOP CAO THỦ</h2>
+            </div>
+            <p class="hint-text">Top 3 sẽ được hệ thống tặng 20$ mỗi tiếng!</p>
+            <div class="list-container">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Hạng</th><th>Tên</th><th>Kỷ lục</th></tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Đổ dữ liệu từ Firebase vào đây -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MÀN HÌNH HỘP THƯ (INBOX) -->
+        <!-- ============================================== -->
+        <div id="inbox-screen" class="screen hidden sub-screen">
+            <div class="sub-header">
+                <button class="btn-back" onclick="backToMenu()">🔙 Quay lại</button>
+                <h2>HỘP THƯ CỦA BẠN</h2>
+            </div>
+            <div id="inbox-list" class="list-container flex-list">
+                <!-- Các lá thư tặng tiền sẽ hiện ở đây -->
+                <div class="empty-msg">Hộp thư trống!</div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MÀN HÌNH NHẬP CODE -->
+        <!-- ============================================== -->
+        <div id="code-screen" class="screen hidden sub-screen">
+            <div class="sub-header">
+                <button class="btn-back" onclick="backToMenu()">🔙 Quay lại</button>
+                <h2>NHẬP GIFTCODE</h2>
+            </div>
+            <div class="action-box">
+                <p>Nhập mã quà tặng từ Admin để nhận tiền $</p>
+                <input type="text" id="giftcode-input" placeholder="Ví dụ: VIP2026..." style="text-transform: uppercase;">
+                <button id="btn-submit-code" class="btn btn-primary">ĐỔI QUÀ NGAY</button>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MÀN HÌNH CHUYỂN TIỀN -->
+        <!-- ============================================== -->
+        <div id="transfer-screen" class="screen hidden sub-screen">
+            <div class="sub-header">
+                <button class="btn-back" onclick="backToMenu()">🔙 Quay lại</button>
+                <h2>CHUYỂN TIỀN</h2>
+            </div>
+            <div class="action-box">
+                <p>Chuyển tiền cho người chơi khác qua Tên của họ</p>
+                <input type="text" id="transfer-receiver" placeholder="Tên người nhận (Ghi chính xác)">
+                <input type="number" id="transfer-amount" placeholder="Số tiền muốn chuyển ($)" min="1">
+                <input type="text" id="transfer-message" placeholder="Lời nhắn (tùy chọn)">
+                <button id="btn-submit-transfer" class="btn btn-primary">GỬI TIỀN</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- THƯ VIỆN FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
