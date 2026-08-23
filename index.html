@@ -46,15 +46,18 @@
             </div>
 
             <div class="menu-buttons">
+                <!-- Nút Chơi Game -->
                 <button id="btn-play" class="btn btn-play">▶ BẮT ĐẦU CHƠI</button>
-                <!-- NÚT THÊM ẢNH NỀN MỚI -->
-    <div style="margin-bottom: 20px;">
-        <input type="file" id="bg-upload" accept="image/*" style="display: none;">
-        <button id="btn-bg-upload" class="btn btn-menu" style="border-color: #00f5d4; color: #00f5d4;" onclick="document.getElementById('bg-upload').click()">
-            🖼️ ĐỔI ẢNH NỀN GAME
-        </button>
-    </div>
-    <!-- KẾT THÚC NÚT THÊM ẢNH -->
+                
+                <!-- Tính năng Tự Đổi Ảnh Nền -->
+                <div style="margin-bottom: 20px;">
+                    <input type="file" id="bg-upload" accept="image/*" style="display: none;">
+                    <button id="btn-bg-upload" class="btn btn-menu" style="border-color: #00f5d4; color: #00f5d4;" onclick="document.getElementById('bg-upload').click()">
+                        🖼️ ĐỔI ẢNH NỀN GAME
+                    </button>
+                </div>
+
+                <!-- Các nút chức năng khác -->
                 <button id="btn-leaderboard" class="btn btn-menu">🏆 BẢNG XẾP HẠNG</button>
                 
                 <div class="btn-group-half">
@@ -65,7 +68,7 @@
                     <button id="btn-giftcode" class="btn btn-menu half">🎁 NHẬP CODE</button>
                 </div>
                 
-                <button id="btn-transfer" class="btn btn-menu">💸 CHUYỂN TIỀN CHO NGƯỜI KHÁC</button>
+                <button id="btn-transfer" class="btn btn-menu">💸 CHUYỂN TIỀN</button>
             </div>
         </div>
 
@@ -116,7 +119,7 @@
         <!-- ============================================== -->
         <div id="leaderboard-screen" class="screen hidden sub-screen">
             <div class="sub-header">
-                <button class="btn-back" onclick="backToMenu()">🔙 Quản lại</button>
+                <button class="btn-back" onclick="backToMenu()">🔙 Quay lại</button>
                 <h2>TOP CAO THỦ</h2>
             </div>
             <p class="hint-text">Top 3 sẽ được hệ thống tặng 20$ mỗi tiếng!</p>
@@ -180,10 +183,11 @@
 
     </div>
 
-    <!-- THƯ VIỆN FIREBASE SDK -->
+    <!-- THƯ VIỆN FIREBASE SDK (Phiên bản chuẩn) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+    <!-- FILE LOGIC GAME -->
     <script src="script.js"></script>
 </body>
 </html>

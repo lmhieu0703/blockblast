@@ -1,22 +1,26 @@
 /* =========================================
-   1. RESET & CÀI ĐẶT CƠ BẢN
+   1. RESET & BẢO VỆ GIAO DIỆN MÀN HÌNH CẢM ỨNG
 ========================================= */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    user-select: none; /* Tránh bôi đen chữ khi bấm nhầm */
+    /* FIX LỖI: Chặn bôi đen chữ khi bấm nhanh */
+    user-select: none; 
+    -webkit-user-select: none;
+    /* FIX LỖI: Chặn highlight xanh khi tap trên điện thoại */
+    -webkit-tap-highlight-color: transparent; 
 }
 
 body {
     font-family: 'Nunito', sans-serif;
-    background-color: #050a15; /* Nền web tối */
+    background-color: #050a15; 
     color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    overflow: hidden;
+    overflow: hidden; /* Chặn cuộn trang web */
 }
 
 /* =========================================
@@ -24,10 +28,10 @@ body {
 ========================================= */
 #app-container {
     width: 100%;
-    max-width: 450px; /* Chiều rộng màn hình điện thoại */
+    max-width: 450px; /* Vừa vặn kích thước Mobile */
     height: 100vh;
     max-height: 850px;
-    background: #0f172a; /* Nền xanh đen sâu */
+    background: #0f172a; 
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
@@ -35,7 +39,7 @@ body {
     flex-direction: column;
 }
 
-/* Cấu trúc Màn hình */
+/* Cấu trúc Màn hình - Ẩn/Hiện chuẩn xác */
 .screen {
     display: none;
     width: 100%;
@@ -45,21 +49,33 @@ body {
 }
 
 .screen.active {
-    display: flex;
+    display: flex; /* Chỉ màn hình active mới được hiển thị */
 }
 
+/* FIX LỖI NÚT BẤM KHÔNG ĐƯỢC: Dùng !important để ẩn hoàn toàn */
 .hidden {
     display: none !important;
 }
 
+/* Hình nền Game Screen do người chơi tự tải */
+#game-screen {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background 0.5s ease;
+    touch-action: none; /* FIX LỖI: Chặn vuốt cuộn trang khi đang kéo thả khối */
+}
+
 /* =========================================
-   3. TYPOGRAPHY & MÀU SẮC NHẤN
+   3. TYPOGRAPHY (CHỮ VÀ HIỆU ỨNG)
 ========================================= */
 .title-gradient {
     font-family: 'Baloo 2', cursive;
     font-size: 32px;
     background: linear-gradient(to right, #00f5d4, #00c6ff);
-    background-clip: text;
+    /* FIX CẢNH BÁO VÀNG CỦA VS CODE */
+    -webkit-background-clip: text;
+    background-clip: text; 
     color: transparent;
     margin-bottom: 10px;
 }
@@ -68,9 +84,8 @@ body {
 .highlight-text { color: #00f5d4; font-weight: bold; margin: 10px 0; font-size: 18px; }
 
 /* =========================================
-   4. THÀNH PHẦN DÙNG CHUNG (UI COMPONENTS)
+   4. NÚT BẤM VÀ Ô NHẬP LIỆU (UI COMPONENTS)
 ========================================= */
-/* Các nút bấm */
 .btn {
     border: none;
     border-radius: 12px;
@@ -78,13 +93,13 @@ body {
     font-weight: 800;
     font-size: 16px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-.btn:active { transform: scale(0.95); }
+.btn:active { transform: scale(0.95); } /* Hiệu ứng lún nút khi bấm */
 
 .btn-primary {
     background: linear-gradient(135deg, #00f5d4, #00c6ff);
@@ -102,7 +117,7 @@ body {
     width: 100%;
 }
 
-/* Ô nhập liệu */
+/* FIX LỖI IOS AUTO-ZOOM: font-size bắt buộc phải >= 16px */
 input {
     width: 100%;
     padding: 15px;
@@ -110,7 +125,7 @@ input {
     border: 2px solid #334155;
     background: #1e293b;
     color: #fff;
-    font-size: 16px;
+    font-size: 16px; 
     margin-bottom: 15px;
     font-family: 'Nunito', sans-serif;
     outline: none;
@@ -146,7 +161,7 @@ input:focus {
 
 .game-logo {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 40px;
     font-family: 'Baloo 2', cursive;
     font-size: 55px;
     line-height: 0.9;
@@ -175,12 +190,11 @@ input:focus {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.btn-menu:hover { background: rgba(255, 255, 255, 0.1); }
+.btn-menu:active { background: rgba(255, 255, 255, 0.1); }
 
 .btn-group-half { display: flex; gap: 15px; }
 .btn-group-half .btn-menu.half { flex: 1; position: relative; }
 
-/* Thông báo đỏ (Hộp thư) */
 .badge {
     background: #ff4757;
     color: #fff;
@@ -195,7 +209,7 @@ input:focus {
 }
 
 /* =========================================
-   6. CÁC MÀN HÌNH PHỤ (SUB-SCREENS)
+   6. CÁC MÀN HÌNH PHỤ & DANH SÁCH (HỘP THƯ, BẢNG XẾP HẠNG)
 ========================================= */
 .sub-screen { padding-top: 30px; }
 
@@ -216,6 +230,7 @@ input:focus {
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
+    padding: 5px 10px;
 }
 
 .action-box {
@@ -227,21 +242,21 @@ input:focus {
 }
 .action-box p { margin-bottom: 20px; color: #94a3b8; }
 
-/* Bảng xếp hạng */
 .hint-text { text-align: center; color: #f3ca20; font-size: 14px; margin-bottom: 15px; font-weight: bold; }
+
 .list-container {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 15px;
     padding: 10px;
-    overflow-y: auto;
-    max-height: 60vh;
+    overflow-y: auto; /* Cho phép cuộn danh sách */
+    max-height: 65vh;
 }
+
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { padding: 15px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .data-table th { color: #64748b; font-size: 14px; text-transform: uppercase; }
 .data-table td { font-weight: bold; font-size: 16px; }
 
-/* Danh sách Hộp thư */
 .flex-list { display: flex; flex-direction: column; gap: 15px; padding: 10px; }
 .inbox-item {
     background: rgba(255, 255, 255, 0.05);
@@ -255,7 +270,7 @@ input:focus {
 .empty-msg { text-align: center; color: #64748b; padding: 20px; }
 
 /* =========================================
-   7. MODAL (BẢNG THÔNG BÁO NỔI)
+   7. MODAL (LỚP PHỦ HỒI SINH / TẠO ACC)
 ========================================= */
 .overlay-screen, .modal-overlay {
     position: absolute;
@@ -264,7 +279,7 @@ input:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 9999; /* Luôn nổi lên trên cùng */
     backdrop-filter: blur(5px);
 }
 
@@ -274,44 +289,45 @@ input:focus {
     border-radius: 20px;
     padding: 30px;
     width: 90%;
+    max-width: 350px;
     text-align: center;
 }
 
 .box-glow { box-shadow: 0 0 30px rgba(0, 245, 212, 0.2); border-color: #00f5d4; }
-.modal-buttons { display: flex; gap: 15px; margin-top: 25px; }
+.modal-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
 .revive-cost { font-size: 24px; font-weight: bold; color: #f3ca20; margin: 15px 0; }
 .note { font-size: 13px; color: #64748b; }
 
 /* =========================================
-   8. KHU VỰC GAME (GAME BOARD & BLOCKS)
+   8. KHU VỰC CHƠI GAME & ĐỒ HỌA KHỐI (BLOCKS)
 ========================================= */
 .game-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .stat-box {
     display: flex;
     flex-direction: column;
     background: rgba(255, 255, 255, 0.05);
-    padding: 10px 20px;
+    padding: 8px 15px;
     border-radius: 12px;
     text-align: center;
-    min-width: 110px;
+    min-width: 100px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .stat-label { font-size: 12px; color: #64748b; font-weight: bold; }
-.stat-value { font-size: 26px; font-weight: 900; font-family: 'Baloo 2', cursive; }
+.stat-value { font-size: 24px; font-weight: 900; font-family: 'Baloo 2', cursive; }
 
 .btn-icon {
     background: rgba(255, 71, 87, 0.1);
     border: 2px solid #ff4757;
     color: #fff;
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     border-radius: 12px;
     font-size: 20px;
     cursor: pointer;
@@ -320,24 +336,17 @@ input:focus {
     align-items: center;
 }
 
-/* Lưới 8x8 */
+/* Lưới Bàn Cờ 8x8 Kính Mờ */
 .grid-wrapper {
     aspect-ratio: 1/1; 
     width: 100%;
     background: rgba(0, 0, 0, 0.5); /* Nền đen trong suốt 50% */
-    backdrop-filter: blur(8px); /* Hiệu ứng kính mờ siêu đẹp làm nổi bật ảnh nền */
+    backdrop-filter: blur(8px); /* Kính mờ siêu đẹp tôn ảnh nền */
+    -webkit-backdrop-filter: blur(8px); /* Cho Safari/iOS */
     border-radius: 10px;
     padding: 6px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Thêm thuộc tính CSS cho Màn hình game để hiển thị ảnh */
-#game-screen {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    transition: background 0.5s ease;
 }
 
 #game-board {
@@ -350,19 +359,18 @@ input:focus {
 }
 
 .cell {
-    background: #1e293b;
+    background: rgba(255, 255, 255, 0.08); /* Màu ô trống mờ mờ */
     border-radius: 6px;
     transition: background 0.1s;
 }
 
-/* Khay chứa 3 khối sinh ngẫu nhiên */
+/* Khay chứa 3 khối sinh ngẫu nhiên bên dưới */
 .choices-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 120px;
-    gap: 15px;
-    padding: 0 10px;
+    height: 140px;
+    padding: 0 5px;
 }
 
 .choice-slot {
@@ -373,33 +381,30 @@ input:focus {
     align-items: center;
 }
 
-/* Khối Block Mini để người chơi kéo thả */
+/* Các khối hình Block Mini kéo thả */
 .draggable-shape {
     display: grid;
     gap: 2px;
-    transform: scale(0.6); /* Thu nhỏ để vừa khay */
+    transform: scale(0.6); /* Thu nhỏ vừa khay */
     cursor: grab;
-    touch-action: none; /* Rất quan trọng để vuốt trên mobile mượt */
+    touch-action: none; /* QUAN TRỌNG: Ngăn chặn cuộn web khi vuốt khối */
+    transition: transform 0.1s ease; /* Hiệu ứng phình to mượt mà */
 }
 
-.draggable-shape:active {
-    cursor: grabbing;
-    transform: scale(1) translateY(-50px); /* Bấm vào thì phóng to và nhích lên để ngón tay không che lấp khối */
-}
-
-/* Ô nhỏ tạo nên khối hình */
+/* Một ô vuông nhỏ cấu tạo nên khối */
 .block-unit {
     width: 40px; 
     height: 40px;
     border-radius: 6px;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4); /* Đổ bóng lõm tạo 3D */
+    border: 1px solid rgba(255,255,255,0.2); /* Viền sáng */
 }
 
-/* Định nghĩa một vài màu ngẫu nhiên cho Block */
-.color-1 { background: #00f5d4; } /* Cyan */
-.color-2 { background: #ff4757; } /* Red */
-.color-3 { background: #f3ca20; } /* Yellow */
-.color-4 { background: #3742fa; } /* Blue */
-.color-5 { background: #ff7f50; } /* Coral */
-.color-6 { background: #2ed573; } /* Green */
-.color-7 { background: #9b59b6; } /* Purple */
+/* Bảng màu rực rỡ của Game Block Blast */
+.color-1 { background: linear-gradient(135deg, #00f5d4, #00c6ff); } /* Cyan */
+.color-2 { background: linear-gradient(135deg, #ff4757, #ff6b81); } /* Red */
+.color-3 { background: linear-gradient(135deg, #f3ca20, #f9ca24); } /* Yellow */
+.color-4 { background: linear-gradient(135deg, #3742fa, #5352ed); } /* Blue */
+.color-5 { background: linear-gradient(135deg, #ff7f50, #ff9f43); } /* Orange */
+.color-6 { background: linear-gradient(135deg, #2ed573, #7bed9f); } /* Green */
+.color-7 { background: linear-gradient(135deg, #9b59b6, #8e44ad); } /* Purple */
