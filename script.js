@@ -28,7 +28,7 @@ const gridSize = 8;
 let board = Array.from({length: gridSize}, () => Array(gridSize).fill(0));
 let currentChoices = [null, null, null];
 
-// CÁC KHỐI GẠCH (Được thiết kế chuẩn xác)
+// CÁC KHỐI GẠCH 
 const SHAPES = [
     { map: [[1]], color: 'color-1' }, // 1x1
     { map: [[1,1],[1,1]], color: 'color-2' }, // 2x2 vuông
@@ -49,7 +49,7 @@ const gameBoardEl = document.getElementById('game-board');
 const choicesEl = document.getElementById('block-choices');
 
 // ==========================================
-// 3. KHỞI TẠO TÀI KHOẢN & DATA TỪ FIREBASE
+// 3. KHỞI TẠO TÀI KHOẢN & DATA
 // ==========================================
 window.onload = () => {
     if (!playerId) {
@@ -65,30 +65,29 @@ window.onload = () => {
     }
 };
 
-// Đăng ký Tân thủ
+// FIX LỖI ĐĂNG KÝ (Vào thẳng game không bị kẹt)
 document.getElementById('btn-register').addEventListener('click', () => {
     const nameInput = document.getElementById('new-player-name').value.trim();
-    if (nameInput.length < 2) return alert("Tên phải dài hơn 2 ký tự!");
+    if (nameInput.length < 2) {
+        alert("Tên phải dài hơn 2 ký tự!");
+        return;
+    }
     
-    // Check trùng tên trên máy chủ
-    db.ref('blockblast/users').orderByChild('name').equalTo(nameInput).once('value', snapshot => {
-        if (snapshot.exists()) {
-            alert("Tên này đã có người dùng! Đổi tên khác nhé sếp.");
-        } else {
-            playerId = 'user_' + Date.now();
-            localStorage.setItem('blockBlastPlayerId', playerId);
-            
-            db.ref(`blockblast/users/${playerId}`).set({
-                name: nameInput,
-                money: 20, // Tặng ngay 20$
-                score: 0,
-                lastTop3Reward: Date.now()
-            }).then(() => {
-                alert("🎉 Đăng ký thành công! Bạn nhận được 20$ quà khởi nghiệp!");
-                loginScreen.classList.add('hidden');
-                loadUserData();
-            });
-        }
+    playerId = 'user_' + Date.now();
+    localStorage.setItem('blockBlastPlayerId', playerId);
+    
+    // Lưu thẳng lên máy chủ
+    db.ref(`blockblast/users/${playerId}`).set({
+        name: nameInput,
+        money: 20,
+        score: 0,
+        lastTop3Reward: Date.now()
+    }).then(() => {
+        alert("🎉 Đăng ký thành công! Bạn nhận được 20$ quà khởi nghiệp!");
+        loginScreen.classList.add('hidden');
+        loadUserData();
+    }).catch((error) => {
+        alert("Lỗi kết nối máy chủ: " + error.message);
     });
 });
 
@@ -105,7 +104,7 @@ function loadUserData() {
         document.getElementById('player-money-display').innerText = playerMoney;
         document.getElementById('high-score').innerText = highScore;
 
-        // Xử lý Hộp Thư Đỏ
+        // Xử lý Hộp Thư
         if (data.inbox) {
             let unread = Object.values(data.inbox).filter(msg => !msg.isRead).length;
             const badge = document.getElementById('inbox-badge');
@@ -128,7 +127,7 @@ function checkTop3Reward(lastRewardTime) {
         
         if (topPlayers.includes(playerId)) {
             const now = Date.now();
-            if (!lastRewardTime || (now - lastRewardTime >= 3600000)) { // 3.600.000ms = 1 giờ
+            if (!lastRewardTime || (now - lastRewardTime >= 3600000)) { 
                 db.ref(`blockblast/users/${playerId}/inbox`).push({
                     sender: "HỆ THỐNG", amount: 20, isRead: false,
                     message: "Thưởng duy trì TOP 3 Cao thủ! (Mỗi giờ nhận 1 lần)"
@@ -142,7 +141,6 @@ function checkTop3Reward(lastRewardTime) {
 // ==========================================
 // 4. LOGIC ĐỔI NỀN & CÁC TÍNH NĂNG KINH TẾ
 // ==========================================
-// Đổi ảnh nền
 document.getElementById('bg-upload').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
@@ -168,7 +166,6 @@ function switchScreen(hideId, showId) {
 }
 function backToMenu() { switchScreen('any', 'menu-screen'); }
 
-// Nút bấm điều hướng
 document.getElementById('btn-giftcode').onclick = () => switchScreen('menu-screen', 'code-screen');
 document.getElementById('btn-transfer').onclick = () => switchScreen('menu-screen', 'transfer-screen');
 document.getElementById('btn-inbox').onclick = () => { switchScreen('menu-screen', 'inbox-screen'); renderInbox(); };
@@ -182,7 +179,7 @@ document.getElementById('btn-submit-code').onclick = () => {
     db.ref(`blockblast/codes/${code}`).once('value', snap => {
         if(!snap.exists()) return alert("Mã không tồn tại hoặc đã bị Admin thu hồi!");
         let codeData = snap.val();
-        if(codeData.usedBy && codeData.usedBy[playerId]) return alert("Bạn đã húp mã này rồi, chừa người khác với!");
+        if(codeData.usedBy && codeData.usedBy[playerId]) return alert("Bạn đã nhận mã này rồi!");
         
         db.ref(`blockblast/codes/${code}/usedBy/${playerId}`).set(true);
         db.ref(`blockblast/users/${playerId}/money`).set(playerMoney + codeData.amount);
@@ -195,31 +192,31 @@ document.getElementById('btn-submit-code').onclick = () => {
 document.getElementById('btn-submit-transfer').onclick = () => {
     let targetName = document.getElementById('transfer-receiver').value.trim();
     let amount = parseInt(document.getElementById('transfer-amount').value);
-    let msg = document.getElementById('transfer-message').value || "Gửi cho bạn ít tiền đi net nè!";
+    let msg = document.getElementById('transfer-message').value || "Gửi cho bạn ít tiền nè!";
     
-    if(!targetName || amount <= 0 || isNaN(amount)) return alert("Điền bậy bạ rồi sếp ơi!");
-    if(amount > playerMoney) return alert("Nghèo mà bày đặt chuyển tiền. Bạn không đủ tiền!");
-    if(targetName === playerName) return alert("Bị ảo à? Sao tự chuyển cho chính mình?");
+    if(!targetName || amount <= 0 || isNaN(amount)) return alert("Vui lòng điền số tiền hợp lệ!");
+    if(amount > playerMoney) return alert("Bạn không đủ tiền để chuyển!");
+    if(targetName === playerName) return alert("Không thể tự chuyển cho chính mình!");
 
     db.ref('blockblast/users').orderByChild('name').equalTo(targetName).once('value', snap => {
-        if(!snap.exists()) return alert("Không tìm thấy ông nào tên này trên máy chủ!");
+        if(!snap.exists()) return alert("Không tìm thấy người chơi này!");
         
         let targetId = Object.keys(snap.val())[0];
         db.ref(`blockblast/users/${playerId}/money`).set(playerMoney - amount);
         db.ref(`blockblast/users/${targetId}/inbox`).push({
             sender: playerName, amount: amount, message: msg, isRead: false
         });
-        alert(`✅ Pằng! Đã chuyển ${amount}$ cho ${targetName} thành công!`);
+        alert(`✅ Đã chuyển ${amount}$ cho ${targetName} thành công!`);
         document.getElementById('transfer-receiver').value = '';
         document.getElementById('transfer-amount').value = '';
     });
 };
 
-// Mở Hộp Thư
+// Hộp Thư
 function renderInbox() {
     db.ref(`blockblast/users/${playerId}/inbox`).once('value', snap => {
         const list = document.getElementById('inbox-list');
-        if (!snap.exists()) { list.innerHTML = '<div class="empty-msg">Hộp thư mốc meo, chả ai tặng tiền.</div>'; return; }
+        if (!snap.exists()) { list.innerHTML = '<div class="empty-msg">Hộp thư trống!</div>'; return; }
         
         list.innerHTML = '';
         snap.forEach(child => {
@@ -231,7 +228,7 @@ function renderInbox() {
                 <span class="sender">Từ: ${msg.sender}</span>
                 <span class="amount">+${msg.amount}$</span>
                 <div class="msg">"${msg.message}"</div>
-                ${!msg.isRead ? `<button onclick="claimMail('${id}', ${msg.amount})" class="btn btn-primary" style="margin-top:10px; padding:8px;">NHẬN TIỀN</button>` : `<span style="color:#64748b; font-size:12px; float:right; margin-top:10px;">Đã bỏ túi</span>`}
+                ${!msg.isRead ? `<button onclick="claimMail('${id}', ${msg.amount})" class="btn btn-primary" style="margin-top:10px; padding:8px;">NHẬN TIỀN</button>` : `<span style="color:#64748b; font-size:12px; float:right; margin-top:10px;">Đã nhận</span>`}
             `;
             list.prepend(div);
         });
@@ -241,7 +238,7 @@ function renderInbox() {
 window.claimMail = function(mailId, amount) {
     db.ref(`blockblast/users/${playerId}/money`).set(playerMoney + amount);
     db.ref(`blockblast/users/${playerId}/inbox/${mailId}/isRead`).set(true);
-    alert(`Đã bú ${amount}$ vào tài khoản!`);
+    alert(`Đã nhận ${amount}$ vào tài khoản!`);
     renderInbox();
 };
 
@@ -264,9 +261,8 @@ function loadLeaderboard() {
     });
 }
 
-
 // ==========================================
-// 5. TRÁI TIM CỦA GAME: LOGIC LƯỚI & KÉO THẢ
+// 5. CORE GAME LOGIC VÀ ENGINE KÉO THẢ
 // ==========================================
 document.getElementById('btn-play').onclick = () => {
     switchScreen('menu-screen', 'game-screen');
@@ -292,6 +288,9 @@ function drawBoard() {
         for(let c=0; c<gridSize; c++) {
             let cell = document.createElement('div');
             cell.className = 'cell';
+            // CỰC KỲ QUAN TRỌNG ĐỂ KÉO THẢ NHẬN DIỆN Ô:
+            cell.id = `cell-${r}-${c}`; 
+            
             if(board[r][c] !== 0) cell.classList.add('block-unit', board[r][c]);
             gameBoardEl.appendChild(cell);
         }
@@ -323,33 +322,29 @@ function spawnShapes() {
         slot.appendChild(shapeEl);
         choicesEl.appendChild(slot);
         
-        // Gắn Engine Kéo Thả
         makeDraggable(shapeEl, shapeInfo, i);
     }
     checkGameOver();
 }
 
 // ----------------------------------------------------
-// THUẬT TOÁN KÉO THẢ SIÊU MƯỢT (FIX 100% BUG TỌA ĐỘ)
+// THUẬT TOÁN KÉO THẢ "MẮT THẦN"
 // ----------------------------------------------------
 let activeDrag = null;
 function makeDraggable(el, shape, index) {
+    let offset = 80; // Nhích lên 80px để ngón tay không che mất gạch
+
     function startDrag(e) {
-        if(e.type === 'touchstart') e.preventDefault(); // FIX: Chặn cuộn màn hình khi chạm vào gạch
-        
         let touch = e.type.includes('touch') ? e.touches[0] : e;
         
-        // Tạo ra 1 bản sao để ngón tay di chuyển
         activeDrag = el.cloneNode(true);
         activeDrag.style.position = 'fixed';
         activeDrag.style.zIndex = '9999';
-        activeDrag.style.pointerEvents = 'none'; // Để đâm xuyên qua lấy tọa độ bàn cờ
-        
-        // Tăng kích thước lên chuẩn khi kéo
+        activeDrag.style.pointerEvents = 'none'; // BẮT BUỘC ĐỂ ĐÂM XUYÊN LẤY TỌA ĐỘ
         activeDrag.style.transform = 'scale(1)'; 
         document.body.appendChild(activeDrag);
         
-        el.style.opacity = '0.2'; // Làm mờ khối gốc ở khay
+        el.style.opacity = '0.2';
         moveDrag(e);
     }
     
@@ -357,40 +352,39 @@ function makeDraggable(el, shape, index) {
         if(!activeDrag) return;
         let touch = e.type.includes('touch') ? e.touches[0] : e;
         
-        // Canh chỉnh khối gạch nhích lên trên ngón tay 60px để không bị che khuất
         activeDrag.style.left = (touch.clientX - (activeDrag.offsetWidth / 2)) + 'px';
-        activeDrag.style.top = (touch.clientY - 80) + 'px';
+        activeDrag.style.top = (touch.clientY - offset) + 'px';
     }
     
     function endDrag(e) {
         if(!activeDrag) return;
-        let touch = e.type.includes('touch') ? e.changedTouches[0] : e;
         
-        // THUẬT TOÁN TOÁN HỌC: Tính toán vị trí thả chính xác tuyệt đối
-        let boardRect = gameBoardEl.getBoundingClientRect();
+        // Xác định vị trí góc trên cùng bên trái của viên gạch
         let dragRect = activeDrag.getBoundingClientRect();
-        
-        let cellWidth = boardRect.width / gridSize;
-        let cellHeight = boardRect.height / gridSize;
-        
-        // Tính ra Cột (C) và Hàng (R) tương ứng với góc trên cùng bên trái của khối gạch
-        let c = Math.round((dragRect.left - boardRect.left) / cellWidth);
-        let r = Math.round((dragRect.top - boardRect.top) / cellHeight);
+        let targetX = dragRect.left + 20; // +20px là vào tâm của ô vuông đầu tiên
+        let targetY = dragRect.top + 20;
+
+        // "Mắt thần": Bắn tia từ tọa độ đó xuống dưới xem trúng ô nào
+        let dropTarget = document.elementFromPoint(targetX, targetY);
 
         activeDrag.remove();
         activeDrag = null;
         el.style.opacity = '1';
 
-        // Kiểm tra xem tọa độ đó có nằm trong bàn cờ không và có thả được không
-        if(r >= 0 && r < gridSize && c >= 0 && c < gridSize) {
+        // Nếu tia bắn trúng đúng 1 ô trên bàn cờ
+        if (dropTarget && dropTarget.id && dropTarget.id.startsWith('cell-')) {
+            let parts = dropTarget.id.split('-');
+            let r = parseInt(parts[1]);
+            let c = parseInt(parts[2]);
+
+            // Kiểm tra xem hình có nhét vừa không
             if(canPlace(shape, r, c)) {
                 placeShape(shape, r, c);
-                el.parentElement.innerHTML = ''; // Xóa khối ở khay
+                el.parentElement.innerHTML = '';
                 currentChoices[index] = null;
                 
                 checkLines();
                 
-                // Nếu khay rỗng thì sinh mới
                 if(currentChoices.every(s => s === null)) {
                     spawnShapes();
                 } else {
@@ -400,6 +394,7 @@ function makeDraggable(el, shape, index) {
         }
     }
     
+    // Gắn sự kiện (passive: false để chống lỗi cuộn web)
     el.addEventListener('mousedown', startDrag);
     el.addEventListener('touchstart', startDrag, {passive: false});
     document.addEventListener('mousemove', moveDrag);
@@ -431,7 +426,7 @@ function placeShape(shape, startR, startC) {
             }
         }
     }
-    score += blocksPlaced; // Mỗi ô nhỏ 1 điểm
+    score += blocksPlaced;
     document.getElementById('current-score').innerText = score;
     drawBoard();
 }
@@ -457,14 +452,11 @@ function checkLines() {
     colsToClear.forEach(c => { for(let r=0; r<gridSize; r++) board[r][c] = 0; });
     
     let lines = rowsToClear.length + colsToClear.length;
-    score += lines * 10; // Ăn 1 hàng được thưởng 10 điểm
+    score += lines * 10;
     document.getElementById('current-score').innerText = score;
     drawBoard();
 }
 
-// ----------------------------------------------------
-// KIỂM TRA THUA GAME VÀ HỒI SINH
-// ----------------------------------------------------
 function checkGameOver() {
     let canMove = false;
     currentChoices.forEach(shape => {
@@ -489,7 +481,7 @@ document.getElementById('btn-do-revive').onclick = () => {
         reviveCost *= 2; 
         reviveModal.classList.add('hidden');
         
-        // Sức mạnh Hồi Sinh: Phá nát 3 hàng dưới cùng
+        // Phá nát 3 hàng dưới cùng
         for(let r=5; r<8; r++) {
             for(let c=0; c<gridSize; c++) board[r][c] = 0;
         }
